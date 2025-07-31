@@ -1,0 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+    /* === Lớp tiện ích cho các nút bấm === */
+    .btn-primary {
+        @apply px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+    }
+    .btn-secondary {
+        @apply px-4 py-2 bg-slate-200 text-slate-800 font-semibold rounded-lg hover:bg-slate-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600;
+    }
+
+    /* === Lớp tiện ích cho các ô nhập liệu === */
+    .input-field {
+        @apply w-full p-2 border border-slate-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 dark:border-slate-600 dark:placeholder-slate-400;
+    }
+
+    /* === Cập nhật màu sắc chủ đạo cho các NavLink === */
+    .nav-icon {
+        @apply p-2 rounded-full text-slate-500 transition-colors duration-150 dark:text-slate-400;
+    }
+    .nav-icon:hover {
+        @apply bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-100;
+    }
+    .nav-icon.active {
+        @apply bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400;
+    }
+
+    /* === Style tùy chỉnh cho Tour Hướng dẫn (intro.js) - Giao diện mới === */
+    .introjs-tooltip {
+        @apply max-w-sm bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 p-5 font-sans;
+    }
+    .introjs-tooltiptext {
+        @apply text-base leading-relaxed;
+    }
+    .introjs-tooltip-header {
+        @apply p-0 border-none;
+    }
+    .introjs-tooltip-header a.introjs-skipbutton {
+        @apply w-6 h-6 text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors;
+    }
+    
+    .introjs-progress {
+        @apply mt-4 h-2 bg-slate-200 dark:bg-slate-700 rounded-full;
+    }
+    .introjs-progressbar {
+        @apply bg-blue-500;
+    }
+    
+    .introjs-bullets {
+        @apply text-center my-4;
+    }
+    .introjs-bullets ul {
+        @apply inline-block p-0 m-0;
+    }
+    .introjs-bullets ul li {
+        @apply inline-block list-none p-0 mx-1;
+    }
+    .introjs-bullets ul li a {
+        @apply block w-2 h-2 bg-slate-300 dark:bg-slate-600 rounded-full transition-colors;
+    }
+    .introjs-bullets ul li a:hover {
+         @apply bg-slate-400 dark:bg-slate-500;
+    }
+    .introjs-bullets ul li a.active {
+        @apply bg-slate-500 dark:bg-slate-400;
+    }
+
+    .introjs-buttons {
+        @apply border-t border-slate-200 dark:border-slate-700 pt-4 mt-4;
+    }
+    .introjs-button {
+        @apply text-sm font-semibold rounded-lg px-4 py-2 transition-all duration-200 shadow-sm border border-transparent;
+        text-shadow: none;
+    }
+    .introjs-button:focus {
+        @apply ring-2 ring-offset-2 ring-blue-500 dark:ring-offset-slate-800;
+    }
+    
+    .introjs-prevbutton {
+        @apply bg-white text-slate-700 border-slate-300 hover:bg-slate-50 dark:bg-slate-700 dark:text-slate-200 dark:border-slate-600 dark:hover:bg-slate-600;
+    }
+    .introjs-nextbutton {
+        @apply bg-blue-600 text-white hover:bg-blue-700;
+    }
+    .introjs-donebutton {
+        @apply bg-green-600 text-white hover:bg-green-700;
+    }
+    .introjs-disabled {
+        @apply opacity-50 cursor-not-allowed;
+    }
+}
