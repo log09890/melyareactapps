@@ -42,7 +42,7 @@ function WelcomePage() {
         className="absolute top-1/2 left-1/2 w-auto min-w-full min-h-full max-w-none transform -translate-x-1/2 -translate-y-1/2 z-0"
       >
         <source 
-          src="src/resource/_a_topdown_202506252001_mxjwt.mp4" 
+          src="C:\Users\WTF\OneDrive - National Economics University\Desktop\melya-react-app\melyareactapps\public\videos\_a_topdown_202506252001_mxjwt.mp4" 
           type="video/mp4" 
         />
         Trình duyệt của bạn không hỗ trợ thẻ video.
