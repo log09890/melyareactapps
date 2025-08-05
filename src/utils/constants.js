@@ -17,6 +17,7 @@ export const COLUMN_MAPPINGS = {
     inventory: { date: "Ngày lấy BC", productId: "Mã sản phẩm", productName: "Tên sản phẩm", totalStock: "Tổng tồn", tower: "Tháp SP", line: "Dòng SP", structure: "Kết cấu" },
     salesRate: { month: 'Tháng xuất dữ liệu', channel: 'Kênh bán', productId: 'Mã sản phẩm', productName: 'Tên sản phẩm', salesAmount: 'Doanh số (Tiền)', totalDiscount: 'Tổng chiết khấu', revenue: 'Doanh thu', profit: 'Lợi nhuận gộp', discountRateInitial: 'Tỷ lệ giảm giá (so với giá bán ban đầu)' },
     channelPerformance: { date: 'Ngày bán', revenue: 'Doanh thu', quantity: 'Doanh số(SL)', channel: 'Kênh bán' },
+    // UPDATE: Cập nhật tên cột cho các mốc 5 và 10 ngày, loại bỏ các mốc không dùng tới
     productLifecycle: {
         productId: 'Mã sản phẩm',
         productName: 'Tên sản phẩm',
@@ -27,12 +28,10 @@ export const COLUMN_MAPPINGS = {
         inventoryStock: 'Tồn kho',
         salesStore2d: 'Số lượng bán tại cửa hàng sau 2 ngày',
         salesOnline2d: 'Số lượng bán online sau 2 ngày',
-        salesStore7d: 'Số lượng bán tại cửa hàng sau 7 ngày',
-        salesOnline7d: 'Số lượng bán online sau 7 ngày',
-        salesStore14d: 'Số lượng bán tại cửa hàng sau 14 ngày',
-        salesOnline14d: 'Số lượng bán online sau 14 ngày',
-        salesStore200d: 'Số lượng bán tại cửa hàng',
-        salesOnline200d: 'Số lượng bán online',
+        salesStore5d: 'Số lượng bán tại cửa hàng sau 5 ngày',
+        salesOnline5d: 'Số lượng bán online sau 5 ngày',
+        salesStore10d: 'Số lượng bán tại cửa hàng sau 10 ngày',
+        salesOnline10d: 'Số lượng bán online sau 10 ngày',
     },
     structureProportion: {
     structureDetail: 'Kết cấu chi tiết',

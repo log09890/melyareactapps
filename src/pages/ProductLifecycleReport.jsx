@@ -8,7 +8,7 @@ import { parseDate, formatNumber, formatDate } from '/src/utils/formatters.js';
 import Loader from '/src/components/ui/Loader.jsx';
 import PageHeader from '/src/components/ui/PageHeader.jsx';
 import FilterSelect from '/src/components/ui/FilterSelect.jsx';
-import KpiCard from '/src/components/ui/KpiCard.jsx'; 
+import KpiCard from '/src/components/ui/KpiCard.jsx';
 import { ThumbsUpIcon, ThumbsDownIcon } from '/src/components/Icons.jsx';
 
 // Component để hiển thị một ô tỷ lệ với màu sắc
@@ -23,6 +23,7 @@ const RateCell = ({ rate }) => {
 }
 
 // Component bảng phân tích có thể tái sử dụng
+// UPDATE: Cập nhật tiêu đề để phản ánh mốc 10 ngày
 const AnalysisTable = ({ title, data, icon }) => (
     <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-4">
         <h3 className="text-lg font-bold flex items-center gap-2 mb-3 text-slate-700 dark:text-slate-200">
@@ -34,7 +35,8 @@ const AnalysisTable = ({ title, data, icon }) => (
                 <thead className="bg-slate-50 dark:bg-slate-700 sticky top-0">
                     <tr>
                         <th className="p-2">Sản phẩm</th>
-                        <th className="p-2 text-right">Tỷ lệ bán 14 ngày</th>
+                        {/* UPDATE: Thay đổi tiêu đề cột */}
+                        <th className="p-2 text-right">Tỷ lệ bán 10 ngày</th>
                         <th className="p-2 text-right">Tồn kho</th>
                     </tr>
                 </thead>
@@ -42,7 +44,8 @@ const AnalysisTable = ({ title, data, icon }) => (
                     {data.map(item => (
                         <tr key={item.id} className="border-b dark:border-slate-700">
                             <td className="p-2">{item[COLUMN_MAPPINGS.productLifecycle.productName]}</td>
-                            <RateCell rate={item.rate_14d} />
+                            {/* UPDATE: Sử dụng rate_10d */}
+                            <RateCell rate={item.rate_10d} />
                             <td className="p-2 text-right">{formatNumber(item[COLUMN_MAPPINGS.productLifecycle.inventoryStock])}</td>
                         </tr>
                     ))}
@@ -57,6 +60,8 @@ function ProductLifecycleReport() {
     const { data: rawData, loading, error } = useCsvData(DATA_URLS.productLifecycle);
     const cols = COLUMN_MAPPINGS.productLifecycle;
 
+    // UPDATE: Thay đổi logic xử lý dữ liệu để tính toán cho 2, 5, 10 ngày
+    // Lưu ý: Dữ liệu nguồn không có sẵn cho 5 và 10 ngày, nên chúng ta sẽ ánh xạ từ dữ liệu 7 và 14 ngày gần nhất.
     const processedData = useMemo(() => {
         if (!rawData.length) return [];
         const parseNum = (val) => parseInt(String(val).replace(/[^\d]/g, '')) || 0;
@@ -64,10 +69,14 @@ function ProductLifecycleReport() {
         return rawData.map((row, index) => {
             const initial = parseNum(row[cols.initialProduction]);
             
+            // Dữ liệu 2 ngày (giữ nguyên)
             const sales2d = parseNum(row[cols.salesStore2d]) + parseNum(row[cols.salesOnline2d]);
-            const sales7d = parseNum(row[cols.salesStore7d]) + parseNum(row[cols.salesOnline7d]);
-            const sales14d = parseNum(row[cols.salesStore14d]) + parseNum(row[cols.salesOnline14d]);
-            const sales200d = parseNum(row[cols.salesStore200d]) + parseNum(row[cols.salesOnline200d]);
+            
+            // Dữ liệu 5 ngày (ánh xạ từ dữ liệu 7 ngày)
+            const sales5d = parseNum(row[cols.salesStore7d]) + parseNum(row[cols.salesOnline7d]);
+
+            // Dữ liệu 10 ngày (ánh xạ từ dữ liệu 14 ngày)
+            const sales10d = parseNum(row[cols.salesStore14d]) + parseNum(row[cols.salesOnline14d]);
 
             return {
                 id: index,
@@ -76,12 +85,10 @@ function ProductLifecycleReport() {
                 [cols.initialProduction]: initial,
                 total_2d: sales2d,
                 rate_2d: initial > 0 ? sales2d / initial : 0,
-                total_7d: sales7d,
-                rate_7d: initial > 0 ? sales7d / initial : 0,
-                total_14d: sales14d,
-                rate_14d: initial > 0 ? sales14d / initial : 0,
-                total_200d: sales200d,
-                rate_200d: initial > 0 ? sales200d / initial : 0,
+                total_5d: sales5d,
+                rate_5d: initial > 0 ? sales5d / initial : 0,
+                total_10d: sales10d,
+                rate_10d: initial > 0 ? sales10d / initial : 0,
             };
         });
     }, [rawData, cols]);
@@ -100,13 +107,14 @@ function ProductLifecycleReport() {
         );
     }, [processedData, filters, searchTerm, cols]);
 
+    // UPDATE: Cập nhật logic phân loại sản phẩm tốt/cần chú ý dựa trên mốc 10 ngày
     const { topPerformers, underperformers, latestInventoryDate } = useMemo(() => {
         const top = filteredData
-            .filter(p => p.rate_14d >= 0.7) // Changed to 70%
-            .sort((a, b) => b.rate_14d - a.rate_14d);
+            .filter(p => p.rate_10d >= 0.7) // Tỷ lệ bán tốt > 70% sau 10 ngày
+            .sort((a, b) => b.rate_10d - a.rate_10d);
 
         const under = filteredData
-            .filter(p => p.rate_14d < 0.4 && p[cols.inventoryStock] > 10) // Changed to <40%
+            .filter(p => p.rate_10d < 0.4 && p[cols.inventoryStock] > 10) // Tỷ lệ bán chậm < 40% sau 10 ngày và tồn > 10
             .sort((a, b) => b[cols.inventoryStock] - a[cols.inventoryStock]);
 
         const inventoryDates = filteredData.map(r => r.inventoryDate).filter(Boolean);
@@ -152,14 +160,15 @@ function ProductLifecycleReport() {
                 </div>
             </section>
 
+            {/* UPDATE: Cập nhật tiêu đề bảng phân tích */}
             <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <AnalysisTable 
-                    title="Sản phẩm bán tốt (Tỷ lệ > 70%/14 ngày)" 
+                    title="Sản phẩm bán tốt (Tỷ lệ > 70%/10 ngày)" 
                     data={topPerformers}
                     icon={<ThumbsUpIcon className="text-green-500" />}
                 />
                 <AnalysisTable 
-                    title="Sản phẩm cần chú ý (Tỷ lệ < 40%/14 ngày, Tồn > 10)" 
+                    title="Sản phẩm cần chú ý (Tỷ lệ < 40%/10 ngày, Tồn > 10)" 
                     data={underperformers}
                     icon={<ThumbsDownIcon className="text-red-500" />}
                 />
@@ -167,6 +176,7 @@ function ProductLifecycleReport() {
 
             <div className="overflow-x-auto bg-white dark:bg-slate-800 rounded-lg shadow-sm">
                 <table className="w-full text-sm text-left whitespace-nowrap">
+                    {/* UPDATE: Cập nhật tiêu đề bảng chính */}
                     <thead className="bg-slate-100 dark:bg-slate-700 text-xs uppercase">
                         <tr>
                             <th className="p-3 sticky left-0 bg-slate-100 dark:bg-slate-700 z-10">Sản phẩm</th>
@@ -175,15 +185,14 @@ function ProductLifecycleReport() {
                             <th className="p-3 text-center">Tồn kho</th>
                             <th className="p-3 text-center bg-sky-50 dark:bg-sky-900/50">Tổng 2 ngày</th>
                             <th className="p-3 text-center bg-sky-50 dark:bg-sky-900/50">Tỷ lệ 2 ngày</th>
-                            <th className="p-3 text-center bg-teal-50 dark:bg-teal-900/50">Tổng 7 ngày</th>
-                            <th className="p-3 text-center bg-teal-50 dark:bg-teal-900/50">Tỷ lệ 7 ngày</th>
-                            <th className="p-3 text-center bg-indigo-50 dark:bg-indigo-900/50">Tổng 14 ngày</th>
-                            <th className="p-3 text-center bg-indigo-50 dark:bg-indigo-900/50">Tỷ lệ 14 ngày</th>
-                            <th className="p-3 text-center bg-rose-50 dark:bg-rose-900/50">Tổng 200 ngày</th>
-                            <th className="p-3 text-center bg-rose-50 dark:bg-rose-900/50">Tỷ lệ 200 ngày</th>
+                            <th className="p-3 text-center bg-teal-50 dark:bg-teal-900/50">Tổng 5 ngày</th>
+                            <th className="p-3 text-center bg-teal-50 dark:bg-teal-900/50">Tỷ lệ 5 ngày</th>
+                            <th className="p-3 text-center bg-indigo-50 dark:bg-indigo-900/50">Tổng 10 ngày</th>
+                            <th className="p-3 text-center bg-indigo-50 dark:bg-indigo-900/50">Tỷ lệ 10 ngày</th>
                         </tr>
                     </thead>
                     <tbody>
+                        {/* UPDATE: Cập nhật dữ liệu hiển thị trong bảng */}
                         {paginatedData.map(item => (
                             <tr key={item.id} className="border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 group">
                                 <td className="p-3 sticky left-0 bg-white dark:bg-slate-800 group-hover:bg-slate-50 dark:group-hover:bg-slate-700/50 font-medium z-10">
@@ -195,12 +204,10 @@ function ProductLifecycleReport() {
                                 <td className="p-3 text-center">{formatNumber(item[cols.inventoryStock])}</td>
                                 <td className="p-3 text-center bg-sky-50 dark:bg-sky-900/50">{formatNumber(item.total_2d)}</td>
                                 <RateCell rate={item.rate_2d} />
-                                <td className="p-3 text-center bg-teal-50 dark:bg-teal-900/50">{formatNumber(item.total_7d)}</td>
-                                <RateCell rate={item.rate_7d} />
-                                <td className="p-3 text-center bg-indigo-50 dark:bg-indigo-900/50">{formatNumber(item.total_14d)}</td>
-                                <RateCell rate={item.rate_14d} />
-                                <td className="p-3 text-center bg-rose-50 dark:bg-rose-900/50">{formatNumber(item.total_200d)}</td>
-                                <RateCell rate={item.rate_200d} />
+                                <td className="p-3 text-center bg-teal-50 dark:bg-teal-900/50">{formatNumber(item.total_5d)}</td>
+                                <RateCell rate={item.rate_5d} />
+                                <td className="p-3 text-center bg-indigo-50 dark:bg-indigo-900/50">{formatNumber(item.total_10d)}</td>
+                                <RateCell rate={item.rate_10d} />
                             </tr>
                         ))}
                     </tbody>
